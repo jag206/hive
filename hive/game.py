@@ -26,7 +26,6 @@ class Board:
     def __init__(self):
         self.grid = np.full((3, 3), None)
         self.root = (1, 1)
-        self.first_move = True
 
     @staticmethod
     def _add(left: Tuple[int, int], right: Tuple[int, int]):
@@ -78,9 +77,6 @@ class Board:
         return "Coming soon TM"
 
     def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
-        if self.first_move and index != (0, 0):
-            raise RuntimeError("First move must be at the root")
-
         inner_index = self._add(self.root, index)
 
         # TODO(james.gunn): Should this check really be here - maybe it should
@@ -93,7 +89,6 @@ class Board:
         # the same colour as the tile we are adding)
 
         self.grid[inner_index] = tile
-        self.first_move = False
         self._maybe_resize_board(index)
 
 
@@ -121,6 +116,7 @@ class Game:
         self.active_player = Player(hive.tiles.Colour.WHITE)
         self.inactive_player = Player(hive.tiles.Colour.BLACK)
         self.board = Board()
+        self.first_move = True
 
     def pretty(self) -> str:
         return (
@@ -131,6 +127,10 @@ class Game:
 
     def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
         logger.debug(f"{tile} @ {index}")
+
+        if self.first_move and index != (0, 0):
+            raise RuntimeError("First move must be at the root")
+
         # check that a valid tile is being played
         if tile not in self.active_player.unused_tiles:
             raise RuntimeError("Can't add tile not on unused rack of active player")
@@ -149,3 +149,5 @@ class Game:
 
         # and now switch the active and passive player
         self.active_player, self.inactive_player = self.inactive_player, self.active_player
+
+        self.first_move = False
