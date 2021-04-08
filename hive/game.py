@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Sequence, Tuple, Type, Optional
+from typing import Dict, Sequence, Tuple, Type, Optional
 import logging
 
 import numpy as np
