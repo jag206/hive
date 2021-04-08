@@ -76,13 +76,13 @@ class Board:
     def pretty(self):
         return "Coming soon TM"
 
+    def __getitem__(self, index: Tuple[int, int]) -> Optional[hive.tiles.Tile]:
+        inner_index = self._add(self.root, index)
+        return self.grid[inner_index]
+
     def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
         inner_index = self._add(self.root, index)
-
-        # TODO(james.gunn): Should this check really be here - maybe it should
-        # be at the game level?
-        if self.grid[inner_index] is not None:
-            raise RuntimeError("Cell is already occupied!")
+        assert self.grid[inner_index] is None
 
         # TODO(james.gunn): Check that by adding this tile we aren't violating
         # the cell colour rule (ie. that all cells that touch this one must be
@@ -136,7 +136,10 @@ class Game:
             raise RuntimeError("Can't add tile not on unused rack of active player")
 
         if not self.active_player.bee_played and self.active_player.turn >= 2 and type(tile) is not hive.tiles.Bee:
-            raise RuntimeError("Bee should be played now")
+            raise RuntimeError("Bee must be played now")
+
+        if self.board[index] is not None:
+            raise RuntimeError("Cell is already occupied!")
 
         # now actually make the move on the board
         self.board.add_tile(tile, index)
