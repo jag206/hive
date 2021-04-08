@@ -82,7 +82,7 @@ class Game:
             f"Inactive Player: {self.inactive_player.pretty()}"
         )
 
-    def add_tile(self, tile: hive.tiles.Tile, x: int, y: int):
+    def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
         # check that a valid tile is being played
         if tile not in self.active_player.unused_tiles:
             raise RuntimeError("Can't add tile not on unused rack of active player")
@@ -91,7 +91,7 @@ class Game:
         # before a player's third (fourth?) turn here
 
         # now actually make the move on the board
-        self.board.add_tile(tile, (x, y))
+        self.board.add_tile(tile, index)
 
         # that succeeded, so now drop the tile from the user's rack
         self.active_player.unused_tiles.remove(tile)
