@@ -1,28 +1,41 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Sequence, Type, Optional
+from typing import Sequence, Tuple, Type, Optional
+
+import numpy as np
 
 import hive.tiles
 
 
-class Cell:
+class Board:
+    """
+    Class encapsulating the underlying structure representing the board.
+    Indexed by integers relative to the root, where x points along the
+    north-east direction in the hexagonal structure, y points in the north
+    direction in the hexagonal structure.
+    """
     def __init__(self):
-        self.tile = None
-        self.neighbours = None
+        self.grid = np.full((3, 3), None)
+        self.root = (1, 1)
+
+    @staticmethod
+    def _add(left: Tuple[int, int], right: Tuple[int, int]):
+        return (left[0] + right[0], left[1] + right[1])
 
     def pretty(self):
         return "Coming soon TM"
 
-    def add_tile(self, tile: hive.tiles.Tile):
-        if self.tile is not None:
+    def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
+        inner_index = self._add(self.root, index)
+
+        if self.grid[inner_index] is not None:
             raise RuntimeError("Cell is already occupied!")
 
         # TODO(james.gunn): Check that by adding this tile we aren't violating
         # the cell colour rule (ie. that all cells that touch this one must be
         # the same colour as the tile we are adding)
 
-        self.tile = tile
-        self.neighbours = [Cell()] * 6
+        self.grid[inner_index] = tile
 
 
 class Player:
@@ -60,7 +73,7 @@ class Game:
     def __init__(self):
         self.active_player = Player(hive.tiles.Colour.WHITE)
         self.inactive_player = Player(hive.tiles.Colour.BLACK)
-        self.root = Cell()
+        self.board = Board()
 
     def pretty(self) -> str:
         return (
@@ -69,7 +82,7 @@ class Game:
             f"Inactive Player: {self.inactive_player.pretty()}"
         )
 
-    def add_tile(self, tile: hive.tiles.Tile, cell: Cell):
+    def add_tile(self, tile: hive.tiles.Tile, x: int, y: int):
         # check that a valid tile is being played
         if tile not in self.active_player.unused_tiles:
             raise RuntimeError("Can't add tile not on unused rack of active player")
@@ -78,7 +91,7 @@ class Game:
         # before a player's third (fourth?) turn here
 
         # now actually make the move on the board
-        cell.add_tile(tile)
+        self.board.add_tile(tile, (x, y))
 
         # that succeeded, so now drop the tile from the user's rack
         self.active_player.unused_tiles.remove(tile)
