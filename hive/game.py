@@ -17,6 +17,10 @@ class Cell:
         if self.tile is not None:
             raise RuntimeError("Cell is already occupied!")
 
+        # TODO(james.gunn): Check that by adding this tile we aren't violating
+        # the cell colour rule (ie. that all cells that touch this one must be
+        # the same colour as the tile we are adding)
+
         self.tile = tile
         self.neighbours = [Cell()] * 6
 
@@ -56,19 +60,22 @@ class Game:
     def __init__(self):
         self.active_player = Player(hive.tiles.Colour.WHITE)
         self.inactive_player = Player(hive.tiles.Colour.BLACK)
-        self.board = Cell()
+        self.root = Cell()
 
     def pretty(self) -> str:
         return (
-            f"\nBoard:\n{self.board.pretty()}\n\n"
+            f"\nBoard:\n{self.root.pretty()}\n\n"
             f"Active Player: {self.active_player.pretty()}\n\n"
             f"Inactive Player: {self.inactive_player.pretty()}"
         )
 
     def add_tile(self, tile: hive.tiles.Tile, cell: Cell):
-        # check that a valid move is being played
+        # check that a valid tile is being played
         if tile not in self.active_player.unused_tiles:
             raise RuntimeError("Can't add tile not on unused rack of active player")
+
+        # TODO(james.gunn): Implement the check that the bee has been played
+        # before a player's third (fourth?) turn here
 
         # now actually make the move on the board
         cell.add_tile(tile)
