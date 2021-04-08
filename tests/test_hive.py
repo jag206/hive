@@ -28,6 +28,13 @@ def test_can_play_at_root():
     game.add_tile(get_tile(game.active_player, hive.tiles.Bee), (0, 0))
 
 
+def test_first_play_must_be_root():
+    game = hive.game.Game()
+
+    with pytest.raises(RuntimeError) as e:
+        game.add_tile(get_tile(game.active_player, hive.tiles.Bee), (0, 1))
+
+
 def test_can_both_play():
     game = hive.game.Game()
     game.add_tile(get_tile(game.active_player, hive.tiles.Bee), (0, 0))
@@ -55,7 +62,7 @@ def test_cannot_both_play_at_root():
 @pytest.mark.skip("Not implemented")
 def test_must_play_bee_on_or_before_turn_three():
     game = hive.game.Game()
-    # TODO(james.gunn): Implement me
+    game.add_tile(get_tile(game.active_player, hive.tiles.Spider), (0, 0))
 
 
 # TODO(james.gunn): Be careful here to test some edge cases where playing the

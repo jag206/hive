@@ -17,6 +17,7 @@ class Board:
     def __init__(self):
         self.grid = np.full((3, 3), None)
         self.root = (1, 1)
+        self.first_move = True
 
     @staticmethod
     def _add(left: Tuple[int, int], right: Tuple[int, int]):
@@ -26,8 +27,13 @@ class Board:
         return "Coming soon TM"
 
     def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
+        if self.first_move and index != (0, 0):
+            raise RuntimeError("First move must be at the root")
+
         inner_index = self._add(self.root, index)
 
+        # TODO(james.gunn): Should this check really be here - maybe it should
+        # be at the game level?
         if self.grid[inner_index] is not None:
             raise RuntimeError("Cell is already occupied!")
 
@@ -36,6 +42,7 @@ class Board:
         # the same colour as the tile we are adding)
 
         self.grid[inner_index] = tile
+        self.first_move = False
 
 
 class Player:
