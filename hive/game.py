@@ -54,20 +54,6 @@ class Player:
     def pretty(self) -> str:
         return ', '.join([str(tile) for tile in self.unused_tiles])
 
-class MoveType(Enum):
-    ADD_TILE = 0
-    MOVE_TILE = 1
-
-
-@dataclass
-class Move:
-    """
-    A class for encapsulating a move that a player wishes to play
-    """
-    move_type: MoveType
-    tile_type: Type[hive.tiles.Tile]
-    position: int
-
 
 class Game:
     def __init__(self):
