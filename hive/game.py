@@ -1,11 +1,20 @@
 from dataclasses import dataclass
 from enum import Enum
 from typing import Sequence, Tuple, Type, Optional
+import logging
 
 import numpy as np
 
 import hive.tiles
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+ch = logging.StreamHandler()
+ch.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(levelname)s: %(message)s')
+ch.setFormatter(formatter)
+# uncomment the below to register the stream handler
+# logger.addHandler(ch)
 
 class Board:
     """
@@ -22,6 +31,48 @@ class Board:
     @staticmethod
     def _add(left: Tuple[int, int], right: Tuple[int, int]):
         return (left[0] + right[0], left[1] + right[1])
+
+    def _maybe_resize_board(self, latest_index: Tuple[int, int]):
+        logger.debug("Considering board resize")
+        neighbours = [
+            self._add(latest_index, (0, 1)),
+            self._add(latest_index, (1, 0)),
+            self._add(latest_index, (1, -1)),
+            self._add(latest_index, (0, -1)),
+            self._add(latest_index, (-1, 0)),
+            self._add(latest_index, (-1, 1)),
+        ]
+        logger.debug(f"Neighbours: {', '.join([str(neighbour) for neighbour in neighbours])}")
+
+        grid_shape = self.grid.shape
+        min_x, max_x = (-self.root[0], (grid_shape[0] - 1) - self.root[0])
+        min_y, max_y = (-self.root[1], (grid_shape[1] - 1) - self.root[1])
+        logger.debug(f"(min_x, max_x)=({min_x}, {max_x})")
+        logger.debug(f"(min_y, max_y)=({min_y}, {max_y})")
+
+        expansion_required = False
+        for neighbour in neighbours:
+            if neighbour[0] < min_x or neighbour[0] > max_x:
+                logger.debug(f"{neighbour} requires an expansion")
+                expansion_required = True
+
+            if neighbour[1] < min_y or neighbour[0] > max_y:
+                logger.debug(f"{neighbour} requires an expansion")
+                expansion_required = True
+
+        if not expansion_required:
+            return
+
+        # add 1 element to the start and end of the grid in each dimension
+        # and fill it with None
+        self.grid = np.pad(self.grid, (1, 1), constant_values=None)
+
+        # modify the root accordingly
+        self.root = self._add(self.root, (1, 1))
+
+        logger.debug(f"New grid shape: {self.grid.shape}")
+        logger.debug(f"New root: {self.root}")
+
 
     def pretty(self):
         return "Coming soon TM"
@@ -43,6 +94,7 @@ class Board:
 
         self.grid[inner_index] = tile
         self.first_move = False
+        self._maybe_resize_board(index)
 
 
 class Player:
@@ -57,6 +109,8 @@ class Player:
             hive.tiles.Spider(colour),
             hive.tiles.Spider(colour),
         }
+        self.turn = 0
+        self.bee_played = False
 
     def pretty(self) -> str:
         return ', '.join([str(tile) for tile in self.unused_tiles])
@@ -76,18 +130,22 @@ class Game:
         )
 
     def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
+        logger.debug(f"{tile} @ {index}")
         # check that a valid tile is being played
         if tile not in self.active_player.unused_tiles:
             raise RuntimeError("Can't add tile not on unused rack of active player")
 
-        # TODO(james.gunn): Implement the check that the bee has been played
-        # before a player's third (fourth?) turn here
+        if not self.active_player.bee_played and self.active_player.turn >= 2 and type(tile) is not hive.tiles.Bee:
+            raise RuntimeError("Bee should be played now")
 
         # now actually make the move on the board
         self.board.add_tile(tile, index)
 
         # that succeeded, so now drop the tile from the user's rack
         self.active_player.unused_tiles.remove(tile)
+        self.active_player.turn += 1
+        if type(tile) is hive.tiles.Bee:
+            self.active_player.bee_played = True
 
         # and now switch the active and passive player
         self.active_player, self.inactive_player = self.inactive_player, self.active_player
