@@ -1,6 +1,4 @@
-from dataclasses import dataclass
-from enum import Enum
-from typing import Dict, Sequence, Tuple, Type, Optional
+from typing import Dict, Tuple, Optional
 import logging
 
 import numpy as np
@@ -15,6 +13,7 @@ formatter = logging.Formatter('%(levelname)s: %(message)s')
 ch.setFormatter(formatter)
 # uncomment the below to register the stream handler
 # logger.addHandler(ch)
+
 
 class Board:
     """
@@ -71,7 +70,6 @@ class Board:
 
         logger.debug(f"New grid shape: {self.grid.shape}")
         logger.debug(f"New root: {self.root}")
-
 
     def pretty(self):
         return "Coming soon TM"

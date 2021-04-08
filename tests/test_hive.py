@@ -5,6 +5,7 @@ import pytest
 import hive.game
 import hive.tiles
 
+
 def get_tile(player: hive.game.Player, tile_type: Type[hive.tiles.Tile]):
     for unused_tile in player.unused_tiles:
         if type(unused_tile) is tile_type:
@@ -12,14 +13,15 @@ def get_tile(player: hive.game.Player, tile_type: Type[hive.tiles.Tile]):
 
     pytest.fail("Player has no tile of that type to play")
 
+
 def test_create_game():
-    game = hive.game.Game()
+    hive.game.Game()
 
 
 def test_cant_add_external_tile():
     game = hive.game.Game()
 
-    with pytest.raises(RuntimeError) as e:
+    with pytest.raises(RuntimeError):
         game.add_tile(hive.tiles.Bee(hive.tiles.Colour.WHITE), (0, 0))
 
 
@@ -31,7 +33,7 @@ def test_can_play_at_root():
 def test_first_play_must_be_root():
     game = hive.game.Game()
 
-    with pytest.raises(RuntimeError) as e:
+    with pytest.raises(RuntimeError):
         game.add_tile(get_tile(game.active_player, hive.tiles.Bee), (0, 1))
 
 
@@ -48,7 +50,7 @@ def test_cannot_play_if_no_tile_of_type():
     game.add_tile(get_tile(game.active_player, hive.tiles.Bee), (0, 0))
     game.add_tile(get_tile(game.active_player, hive.tiles.Bee), (0, 1))
 
-    with pytest.raises(RuntimeError) as e:
+    with pytest.raises(RuntimeError):
         game.add_tile(get_tile(game.active_player, hive.tiles.Bee), (0, -1))
 
 
@@ -115,5 +117,5 @@ def test_cannot_add_tile_disconnected():
 # eg. if the hive bends around to reconnect with itself further around
 @pytest.mark.skip("Not implemented")
 def test_cannot_add_tile_where_it_touches_opposite_color():
-    game = hive.game.Game()
     # TODO(james.gunn): Implement me
+    pass
