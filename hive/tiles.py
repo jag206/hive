@@ -1,4 +1,13 @@
+from enum import Enum
+
+class Colour(Enum):
+    WHITE = 0
+    BLACK = 1
+
 class Tile:
+    def __init__(self, colour: Colour):
+        self.colour = colour
+
     def _emoji(self) -> str:
         raise NotImplementedError()
 
