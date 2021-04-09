@@ -54,7 +54,7 @@ class Board:
                 logger.debug(f"{neighbour} requires an expansion")
                 expansion_required = True
 
-            if neighbour[1] < min_y or neighbour[0] > max_y:
+            if neighbour[1] < min_y or neighbour[1] > max_y:
                 logger.debug(f"{neighbour} requires an expansion")
                 expansion_required = True
 
