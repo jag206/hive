@@ -151,9 +151,20 @@ class Game:
             f"Inactive Player: {self.inactive_player.pretty()}"
         )
 
-    def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
-        logger.debug(f"{tile} @ {index}")
+    def _disconnect_check(self, index: Tuple[int, int]):
+        neighbour_count = sum(
+            tile is not None for tile in self.board.neighbours(index)
+        )
+        if neighbour_count == 0:
+            raise RuntimeError("Tile would be disconnected")
 
+    def _opposing_color_violation_check(self, index: Tuple[int, int]):
+        # check for opposing colour violation
+        for neighbour in self.board.neighbours(index):
+            if neighbour.colour != self.active_player.colour:
+                raise RuntimeError("Tile would be touching opposite colour.")
+
+    def _valid_move_checks(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
         if self.first_move and index != (0, 0):
             raise RuntimeError("First move must be at the root")
 
@@ -169,19 +180,14 @@ class Game:
 
         # skip the neighbour count check on the very first move only
         if not self.first_move:
-            neighbour_count = sum(
-                tile is not None for tile in self.board.neighbours(index)
-            )
-            if neighbour_count == 0:
-                raise RuntimeError("Tile would be disconnected")
+            self._disconnect_check(index)
 
         if self.active_player.turn > 0:
-            # check for opposing colour violation
-            for neighbour in self.board.neighbours(index):
-                if neighbour.colour != self.active_player.colour:
-                    raise RuntimeError("Tile would be touching opposite colour.")
+            self._opposing_color_violation_check(index)
 
-        # now actually make the move on the board
+    def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
+        logger.debug(f"{tile} @ {index}")
+        self._valid_move_checks(tile, index)
         self.board.add_tile(tile, index)
 
         # that succeeded, so now drop the tile from the user's rack
