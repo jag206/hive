@@ -55,6 +55,9 @@ class Game:
         if self.board[from_index] is None:
             raise RuntimeError("Cannot move piece from empty tile")
 
+        if self.board[to_index] is not None:
+            raise RuntimeError("Cannot move piece to non-empty tile")
+
         if self.board[from_index].colour != self.active_player.colour:
             raise RuntimeError("Cannot move opponent's piece")
 
