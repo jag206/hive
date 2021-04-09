@@ -24,47 +24,6 @@ class Board:
     def _add(left: Tuple[int, int], right: Tuple[int, int]):
         return (left[0] + right[0], left[1] + right[1])
 
-    def _maybe_resize_board(self, latest_index: Tuple[int, int]):
-        logger.debug("Considering board resize")
-        neighbours = [
-            self._add(latest_index, (0, 1)),
-            self._add(latest_index, (1, 0)),
-            self._add(latest_index, (1, -1)),
-            self._add(latest_index, (0, -1)),
-            self._add(latest_index, (-1, 0)),
-            self._add(latest_index, (-1, 1)),
-        ]
-        logger.debug(f"Neighbours: {', '.join([str(neighbour) for neighbour in neighbours])}")
-
-        grid_shape = self.grid.shape
-        min_x, max_x = (-self.root[0], (grid_shape[0] - 1) - self.root[0])
-        min_y, max_y = (-self.root[1], (grid_shape[1] - 1) - self.root[1])
-        logger.debug(f"(min_x, max_x)=({min_x}, {max_x})")
-        logger.debug(f"(min_y, max_y)=({min_y}, {max_y})")
-
-        expansion_required = False
-        for neighbour in neighbours:
-            if neighbour[0] < min_x or neighbour[0] > max_x:
-                logger.debug(f"{neighbour} requires an expansion")
-                expansion_required = True
-
-            if neighbour[1] < min_y or neighbour[1] > max_y:
-                logger.debug(f"{neighbour} requires an expansion")
-                expansion_required = True
-
-        if not expansion_required:
-            return
-
-        # add 1 element to the start and end of the grid in each dimension
-        # and fill it with None
-        self.grid = np.pad(self.grid, (1, 1), constant_values=None)
-
-        # modify the root accordingly
-        self.root = self._add(self.root, (1, 1))
-
-        logger.debug(f"New grid shape: {self.grid.shape}")
-        logger.debug(f"New root: {self.root}")
-
     def pretty(self):
         return "Coming soon TM"
 
@@ -81,8 +40,17 @@ class Board:
 
     def __setitem__(self, index: Tuple[int, int], tile: hive.tiles.Tile):
         inner_index = self._add(self.root, index)
-        self.grid[inner_index] = tile
-        self._maybe_resize_board(index)
+
+        # trigger a resize if required
+        padding = np.array([
+            [max(-inner_index[0], 0), max(inner_index[0] - (self.grid.shape[0] - 1), 0)],
+            [max(-inner_index[1], 0), max(inner_index[1] - (self.grid.shape[1] - 1), 0)],
+        ], dtype=int)
+        self.grid = np.pad(self.grid, padding, constant_values=None)
+        self.root = self._add(self.root, (max(-inner_index[0], 0), max(-inner_index[1], 0)))
+
+        new_inner_index = self._add(self.root, index)
+        self.grid[new_inner_index] = tile
 
     def neighbours(self, index: Tuple[int, int]) -> Set[hive.tiles.Tile]:
         """

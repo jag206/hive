@@ -6,30 +6,21 @@ def test_create_board():
     hive.board.Board()
 
 
-def test_set_and_get_friendly():
-    board = hive.board.Board()
-    board[(0, 0)] = "a"
-    board[(0, 1)] = "b"
-    board[(-1, 0)] = "c"
-
-    assert board[(0, 0)] == "a"
-    assert board[(0, 1)] == "b"
-    assert board[(-1, 0)] == "c"
-
-
-@pytest.mark.skip("Skipped whilst board resizes from root")
 def test_set_and_get():
     board = hive.board.Board()
     board[(3, 2)] = "a"
     board[(1, -2)] = "b"
     board[(0, 0)] = "c"
+    board[(-5, -9)] = "d"
+    board[(-7, 1)] = "e"
 
     assert board[(3, 2)] == "a"
     assert board[(1, -2)] == "b"
     assert board[(0, 0)] == "c"
+    assert board[(-5, -9)] == "d"
+    assert board[(-7, 1)] == "e"
 
 
-@pytest.mark.skip("Skipped whilst board resizes from root")
 def test_neighbours():
     board = hive.board.Board()
     board[(3, 3)] = "a"
