@@ -155,9 +155,20 @@ def test_cannot_request_move_from_occupied_tile():
         game.move_tile((0, 0), (0, 1))
 
 
-@pytest.mark.skip("Not implemented")
+# in this test we deliberately setup the situation so the hive is only disconnected whilst the piece is in transit,
+# thus testing the harder case that also encompasses the easier case, those situations where the hive would remain
+# disconnected after the piece is replaced
 def test_move_must_not_disconnect_hive():
-    pass
+    game = hive.game.Game()
+    game.add_tile(hive.tiles.Spider, (0, 0))
+    game.add_tile(hive.tiles.Bee, (1, 0))
+
+    game.add_tile(hive.tiles.Bee, (0, -1))
+    game.add_tile(hive.tiles.Spider, (2, 0))
+
+    # this should be a valid move for the spider, but it disconnects the hive!
+    with pytest.raises(RuntimeError):
+        game.move_tile((0,0), (1, -1))
 
 
 @pytest.mark.skip("Not implemented")
