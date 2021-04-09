@@ -162,9 +162,11 @@ class Game:
         if self.board[index] is not None:
             raise RuntimeError("Cell is already occupied!")
 
-        for neighbour in self.board.neighbours(index):
-            if neighbour.colour != self.active_player.colour:
-                raise RuntimeError("Tile would be touching opposite colour.")
+        if self.active_player.turn > 0:
+            # check for opposing color violation
+            for neighbour in self.board.neighbours(index):
+                if neighbour.colour != self.active_player.colour:
+                    raise RuntimeError("Tile would be touching opposite colour.")
 
         # now actually make the move on the board
         self.board.add_tile(tile, index)
