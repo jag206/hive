@@ -42,12 +42,19 @@ class Board:
         inner_index = self._add(self.root, index)
 
         # trigger a resize if required
+        pad_x_before = max(-inner_index[0], 0)
+        pad_x_after = max(inner_index[0] - (self.grid.shape[0] - 1), 0)
+        pad_y_before = max(-inner_index[1], 0)
+        pad_y_after = max(inner_index[1] - (self.grid.shape[1] - 1), 0)
         padding = np.array([
-            [max(-inner_index[0], 0), max(inner_index[0] - (self.grid.shape[0] - 1), 0)],
-            [max(-inner_index[1], 0), max(inner_index[1] - (self.grid.shape[1] - 1), 0)],
+            [pad_x_before, pad_x_after],
+            [pad_y_before, pad_y_after],
         ], dtype=int)
+        # pad the array to permit the required index to be inserted, note that
+        # all pad values may be 0 which will not trigger a resize
         self.grid = np.pad(self.grid, padding, constant_values=None)
-        self.root = self._add(self.root, (max(-inner_index[0], 0), max(-inner_index[1], 0)))
+        # any padding added at the start of the grid cause a shift to the root
+        self.root = self._add(self.root, (pad_x_before, pad_y_before))
 
         new_inner_index = self._add(self.root, index)
         self.grid[new_inner_index] = tile
