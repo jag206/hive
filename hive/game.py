@@ -76,6 +76,13 @@ class Board:
 
     def __getitem__(self, index: Tuple[int, int]) -> Optional[hive.tiles.Tile]:
         inner_index = self._add(self.root, index)
+
+        if inner_index[0] < 0 or inner_index[0] > self.grid.shape[0] - 1:
+            return None
+
+        if inner_index[1] < 0 or inner_index[1] > self.grid.shape[1] - 1:
+            return None
+
         return self.grid[inner_index]
 
     def neighbours(self, index: Tuple[int, int]) -> Set[hive.tiles.Tile]:
@@ -107,8 +114,6 @@ class Board:
 
     def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
         inner_index = self._add(self.root, index)
-        assert self.grid[inner_index] is None
-
         self.grid[inner_index] = tile
         self._maybe_resize_board(index)
 
@@ -162,8 +167,16 @@ class Game:
         if self.board[index] is not None:
             raise RuntimeError("Cell is already occupied!")
 
+        # skip the neighbour count check on the very first move only
+        if not self.first_move:
+            neighbour_count = sum(
+                tile is not None for tile in self.board.neighbours(index)
+            )
+            if neighbour_count == 0:
+                raise RuntimeError("Tile would be disconnected")
+
         if self.active_player.turn > 0:
-            # check for opposing color violation
+            # check for opposing colour violation
             for neighbour in self.board.neighbours(index):
                 if neighbour.colour != self.active_player.colour:
                     raise RuntimeError("Tile would be touching opposite colour.")

@@ -103,7 +103,6 @@ def test_must_play_bee_on_or_before_turn_three_c():
     game.add_tile(get_tile(game.active_player, hive.tiles.Spider), (0, 3))
 
 
-@pytest.mark.skip
 def test_cannot_add_tile_disconnected():
     game = hive.game.Game()
     game.add_tile(get_tile(game.active_player, hive.tiles.Spider), (0, 0))
