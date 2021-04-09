@@ -114,3 +114,38 @@ def test_cannot_add_tile_where_it_touches_opposite_color():
 
     with pytest.raises(RuntimeError):
         game.add_tile(hive.tiles.Spider, (2, 0))
+
+
+@pytest.mark.skip("Requires beetle movement implementation")
+def test_elevated_beetle_can_win():
+    pass
+
+
+@pytest.mark.skip("Requires beetle movement implementation")
+def test_elevated_beetle_allows_new_tile():
+    pass
+
+
+@pytest.mark.skip("Not implemented")
+def test_cannot_move_opponents_tile():
+    pass
+
+
+@pytest.mark.skip("Not implemented")
+def test_cannot_request_move_to_occupied_tile():
+    pass
+
+
+@pytest.mark.skip("Not implemented")
+def test_cannot_request_move_from_occupied_tile():
+    pass
+
+
+@pytest.mark.skip("Not implemented")
+def test_move_must_not_disconnect_hive():
+    pass
+
+
+@pytest.mark.skip("Not implemented")
+def test_cannot_move_tile_under_beetle():
+    pass
