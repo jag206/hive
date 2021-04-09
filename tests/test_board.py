@@ -33,3 +33,36 @@ def test_neighbours():
     assert board.neighbours((4, 3)) == {"a", "b", "d", "f"}
     assert board.neighbours((1, 3)) == {"e"}
     assert board.neighbours((1, 5)) == set()
+
+
+def test_connected_components_a():
+    board = hive.board.Board()
+
+    assert board.connected_components() == 0
+
+
+def test_connected_components_b():
+    board = hive.board.Board()
+
+    board[(0, 0)] = "a"
+
+    assert board.connected_components() == 1
+
+
+def test_connected_components_c():
+    board = hive.board.Board()
+
+    board[(0, 0)] = "a"
+    board[(1, 1)] = "b"
+
+    assert board.connected_components() == 2
+
+
+def test_connected_components_d():
+    board = hive.board.Board()
+
+    board[(0, 0)] = "a"
+    board[(1, 1)] = "b"
+    board[(1, 0)] = "c"
+
+    assert board.connected_components() == 1

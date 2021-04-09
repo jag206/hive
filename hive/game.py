@@ -14,6 +14,14 @@ ch.setFormatter(formatter)
 # logger.addHandler(ch)
 
 
+class HiveError(RuntimeError):
+    pass
+
+
+class DisconnectedHiveError(HiveError):
+    pass
+
+
 class Player:
     def __init__(self, colour: hive.tiles.Colour):
         self.colour = colour
@@ -60,6 +68,16 @@ class Game:
 
         if self.board[from_index].colour != self.active_player.colour:
             raise RuntimeError("Cannot move opponent's piece")
+
+        # remove the specified piece from the board and check connected
+        # components
+        tile = self.board[from_index]
+        del self.board[from_index]
+        is_disconnected = self.board.connected_components() > 1
+        self.board[from_index] = tile
+
+        if is_disconnected:
+            raise DisconnectedHiveError("Moving tile would disconnect hive")
 
     def _disconnect_check(self, index: Tuple[int, int]):
         neighbour_count = sum(

@@ -39,6 +39,7 @@ class Board:
         return self.grid[inner_index]
 
     def __setitem__(self, index: Tuple[int, int], tile: hive.tiles.Tile):
+        # TODO(james.gunn): Check for assignment of None?
         inner_index = self._add(self.root, index)
 
         # trigger a resize if required
@@ -58,6 +59,14 @@ class Board:
 
         new_inner_index = self._add(self.root, index)
         self.grid[new_inner_index] = tile
+
+    def __delitem__(self, index: Tuple[int, int]):
+        # TODO(james.gunn): Might we want to shrink the board back down?
+        inner_index = self._add(self.root, index)
+        self.grid[inner_index] = None
+
+    def connected_components(self) -> int:
+        raise NotImplementedError()
 
     def neighbours(self, index: Tuple[int, int]) -> Set[hive.tiles.Tile]:
         """

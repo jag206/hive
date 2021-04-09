@@ -167,8 +167,8 @@ def test_move_must_not_disconnect_hive():
     game.add_tile(hive.tiles.Spider, (2, 0))
 
     # this should be a valid move for the spider, but it disconnects the hive!
-    with pytest.raises(RuntimeError):
-        game.move_tile((0,0), (1, -1))
+    with pytest.raises(hive.game.DisconnectedHiveError):
+        game.move_tile((0, 0), (1, -1))
 
 
 @pytest.mark.skip("Not implemented")
