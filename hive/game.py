@@ -23,8 +23,8 @@ class Board:
     direction in the hexagonal structure.
     """
     def __init__(self):
-        self.grid = np.full((3, 3), None)
-        self.root = (1, 1)
+        self.grid = np.full((1, 1), None)
+        self.root = (0, 0)
 
     @staticmethod
     def _add(left: Tuple[int, int], right: Tuple[int, int]):
