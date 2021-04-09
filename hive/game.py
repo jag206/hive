@@ -85,6 +85,11 @@ class Board:
 
         return self.grid[inner_index]
 
+    def __setitem__(self, index: Tuple[int, int], tile: hive.tiles.Tile):
+        inner_index = self._add(self.root, index)
+        self.grid[inner_index] = tile
+        self._maybe_resize_board(index)
+
     def neighbours(self, index: Tuple[int, int]) -> Set[hive.tiles.Tile]:
         """
         Returns the neighbours of the specified cell., may be empty.
@@ -111,11 +116,6 @@ class Board:
                 neighbour_tiles.add(neighbour_tile)
 
         return neighbour_tiles
-
-    def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
-        inner_index = self._add(self.root, index)
-        self.grid[inner_index] = tile
-        self._maybe_resize_board(index)
 
 
 class Player:
@@ -191,7 +191,7 @@ class Game:
         except StopIteration:
             raise RuntimeError("No tiles of requested type available.")
 
-        self.board.add_tile(tile, index)
+        self.board[index] = tile
 
         # that succeeded, so now drop the tile from the user's rack
         self.active_player.unused_tiles.remove(tile)
