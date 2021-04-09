@@ -161,5 +161,5 @@ def test_move_must_not_disconnect_hive():
 
 
 @pytest.mark.skip("Not implemented")
-def test_cannot_move_tile_under_beetle():
+def test_cannot_move_tile_from_under_beetle():
     pass
