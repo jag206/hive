@@ -112,10 +112,15 @@ def test_cannot_add_tile_disconnected():
         game.add_tile(get_tile(game.active_player, hive.tiles.Spider), (0, 2))
 
 
-# TODO(james.gunn): Be careful here to test some edge cases where playing the
-# tile would violate a connection that hasn't been explicitly constructed
-# eg. if the hive bends around to reconnect with itself further around
-@pytest.mark.skip("Not implemented")
 def test_cannot_add_tile_where_it_touches_opposite_color():
-    # TODO(james.gunn): Implement me
-    pass
+    game = hive.game.Game()
+
+    # both players should be able to play their first tile...
+    game.add_tile(get_tile(game.active_player, hive.tiles.Bee), (0, 0))
+    game.add_tile(get_tile(game.active_player, hive.tiles.Bee), (1, 0))
+
+    # ...but the first player should not be able to connect their second piece
+    # to the first player's first piece
+
+    with pytest.raises(RuntimeError):
+        game.add_tile(get_tile(game.active_player, hive.tiles.Spider), (2,0))
