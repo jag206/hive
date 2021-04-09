@@ -1,4 +1,4 @@
-from typing import Dict, Set, Tuple, Optional
+from typing import Dict, Set, Tuple, Type, Optional
 import logging
 
 import numpy as np
@@ -164,15 +164,11 @@ class Game:
             if neighbour.colour != self.active_player.colour:
                 raise RuntimeError("Tile would be touching opposite colour.")
 
-    def _valid_move_checks(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
+    def _valid_move_checks(self, tile_type: Type[hive.tiles.Tile], index: Tuple[int, int]):
         if self.first_move and index != (0, 0):
             raise RuntimeError("First move must be at the root")
 
-        # check that a valid tile is being played
-        if tile not in self.active_player.unused_tiles:
-            raise RuntimeError("Can't add tile not on unused rack of active player")
-
-        if not self.active_player.bee_played and self.active_player.turn >= 2 and type(tile) is not hive.tiles.Bee:
+        if not self.active_player.bee_played and self.active_player.turn >= 2 and tile_type is not hive.tiles.Bee:
             raise RuntimeError("Bee must be played now")
 
         if self.board[index] is not None:
@@ -185,15 +181,22 @@ class Game:
         if self.active_player.turn > 0:
             self._opposing_color_violation_check(index)
 
-    def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
-        logger.debug(f"{tile} @ {index}")
-        self._valid_move_checks(tile, index)
+    def add_tile(self, tile_type: Type[hive.tiles.Tile], index: Tuple[int, int]):
+        logger.debug(f"Playing {tile_type} @ {index}")
+        self._valid_move_checks(tile_type, index)
+
+        # try and get a tile of the requested type
+        try:
+            tile = next(filter(lambda tile: type(tile) is tile_type, self.active_player.unused_tiles))
+        except StopIteration:
+            raise RuntimeError("No tiles of requested type available.")
+
         self.board.add_tile(tile, index)
 
         # that succeeded, so now drop the tile from the user's rack
         self.active_player.unused_tiles.remove(tile)
         self.active_player.turn += 1
-        if type(tile) is hive.tiles.Bee:
+        if tile_type is hive.tiles.Bee:
             self.active_player.bee_played = True
 
         # and now switch the active and passive player
