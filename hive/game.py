@@ -76,6 +76,13 @@ class Board:
 
     def __getitem__(self, index: Tuple[int, int]) -> Optional[hive.tiles.Tile]:
         inner_index = self._add(self.root, index)
+
+        if inner_index[0] < 0 or inner_index[0] > self.grid.shape[0] - 1:
+            return None
+
+        if inner_index[1] < 0 or inner_index[1] > self.grid.shape[1] - 1:
+            return None
+
         return self.grid[inner_index]
 
     def neighbours(self, index: Tuple[int, int]) -> Set[hive.tiles.Tile]:
@@ -107,8 +114,6 @@ class Board:
 
     def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
         inner_index = self._add(self.root, index)
-        assert self.grid[inner_index] is None
-
         self.grid[inner_index] = tile
         self._maybe_resize_board(index)
 
@@ -146,9 +151,20 @@ class Game:
             f"Inactive Player: {self.inactive_player.pretty()}"
         )
 
-    def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
-        logger.debug(f"{tile} @ {index}")
+    def _disconnect_check(self, index: Tuple[int, int]):
+        neighbour_count = sum(
+            tile is not None for tile in self.board.neighbours(index)
+        )
+        if neighbour_count == 0:
+            raise RuntimeError("Tile would be disconnected")
 
+    def _opposing_color_violation_check(self, index: Tuple[int, int]):
+        # check for opposing colour violation
+        for neighbour in self.board.neighbours(index):
+            if neighbour.colour != self.active_player.colour:
+                raise RuntimeError("Tile would be touching opposite colour.")
+
+    def _valid_move_checks(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
         if self.first_move and index != (0, 0):
             raise RuntimeError("First move must be at the root")
 
@@ -162,13 +178,16 @@ class Game:
         if self.board[index] is not None:
             raise RuntimeError("Cell is already occupied!")
 
-        if self.active_player.turn > 0:
-            # check for opposing color violation
-            for neighbour in self.board.neighbours(index):
-                if neighbour.colour != self.active_player.colour:
-                    raise RuntimeError("Tile would be touching opposite colour.")
+        # skip the neighbour count check on the very first move only
+        if not self.first_move:
+            self._disconnect_check(index)
 
-        # now actually make the move on the board
+        if self.active_player.turn > 0:
+            self._opposing_color_violation_check(index)
+
+    def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
+        logger.debug(f"{tile} @ {index}")
+        self._valid_move_checks(tile, index)
         self.board.add_tile(tile, index)
 
         # that succeeded, so now drop the tile from the user's rack
