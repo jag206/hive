@@ -1,4 +1,4 @@
-from typing import Dict, Tuple, Optional
+from typing import Dict, Set, Tuple, Optional
 import logging
 
 import numpy as np
@@ -78,13 +78,36 @@ class Board:
         inner_index = self._add(self.root, index)
         return self.grid[inner_index]
 
+    def neighbours(self, index: Tuple[int, int]) -> Set[hive.tiles.Tile]:
+        """
+        Returns the neighbours of the specified cell., may be empty.
+
+        Neighbours are not returned in any order.
+        """
+        neighbour_tiles: Set[hive.tiles.Tile] = set()
+        neighbour_idxs = {
+            self._add(index, (0, 1)),
+            self._add(index, (1, 0)),
+            self._add(index, (1, -1)),
+            self._add(index, (0, -1)),
+            self._add(index, (-1, 0)),
+            self._add(index, (-1, 1)),
+        }
+
+        for neighbour_idx in neighbour_idxs:
+            try:
+                neighbour_tile = self[neighbour_idx]
+            except IndexError:
+                continue
+
+            if neighbour_tile is not None:
+                neighbour_tiles.add(neighbour_tile)
+
+        return neighbour_tiles
+
     def add_tile(self, tile: hive.tiles.Tile, index: Tuple[int, int]):
         inner_index = self._add(self.root, index)
         assert self.grid[inner_index] is None
-
-        # TODO(james.gunn): Check that by adding this tile we aren't violating
-        # the cell colour rule (ie. that all cells that touch this one must be
-        # the same colour as the tile we are adding)
 
         self.grid[inner_index] = tile
         self._maybe_resize_board(index)
@@ -138,6 +161,10 @@ class Game:
 
         if self.board[index] is not None:
             raise RuntimeError("Cell is already occupied!")
+
+        for neighbour in self.board.neighbours(index):
+            if neighbour.colour != self.active_player.colour:
+                raise RuntimeError("Tile would be touching opposite colour.")
 
         # now actually make the move on the board
         self.board.add_tile(tile, index)

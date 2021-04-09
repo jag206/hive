@@ -123,4 +123,4 @@ def test_cannot_add_tile_where_it_touches_opposite_color():
     # to the first player's first piece
 
     with pytest.raises(RuntimeError):
-        game.add_tile(get_tile(game.active_player, hive.tiles.Spider), (2,0))
+        game.add_tile(get_tile(game.active_player, hive.tiles.Spider), (2, 0))
