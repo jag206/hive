@@ -19,12 +19,16 @@ class Player:
         self.colour = colour
         self.unused_tiles: Dict[hive.tiles.Tile] = {
             hive.tiles.Bee(colour),
+            hive.tiles.Beetle(colour),
             hive.tiles.Ant(colour),
             hive.tiles.Ant(colour),
             hive.tiles.Ant(colour),
             hive.tiles.Spider(colour),
             hive.tiles.Spider(colour),
             hive.tiles.Spider(colour),
+            hive.tiles.Grasshopper(colour),
+            hive.tiles.Grasshopper(colour),
+            hive.tiles.Grasshopper(colour),
         }
         self.turn = 0
         self.bee_played = False

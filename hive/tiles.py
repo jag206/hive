@@ -30,3 +30,13 @@ class Ant(Tile):
 class Spider(Tile):
     def _emoji(self) -> str:
         return "🕷️"
+
+
+class Beetle(Tile):
+    def _emoji(self) -> str:
+        return "Beetle"
+
+
+class Grasshopper(Tile):
+    def _emoji(self) -> str:
+        return "🦗"
