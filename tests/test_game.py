@@ -126,9 +126,12 @@ def test_elevated_beetle_allows_new_tile():
     pass
 
 
-@pytest.mark.skip("Not implemented")
 def test_cannot_move_opponents_tile():
-    pass
+    game = hive.game.Game()
+    game.add_tile(hive.tiles.Bee, (0, 0))
+
+    with pytest.raises(RuntimeError):
+        game.move_tile((0, 0), (0, 1))
 
 
 @pytest.mark.skip("Not implemented")
@@ -136,9 +139,11 @@ def test_cannot_request_move_to_occupied_tile():
     pass
 
 
-@pytest.mark.skip("Not implemented")
 def test_cannot_request_move_from_occupied_tile():
-    pass
+    game = hive.game.Game()
+
+    with pytest.raises(RuntimeError):
+        game.move_tile((0, 0), (0, 1))
 
 
 @pytest.mark.skip("Not implemented")

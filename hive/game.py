@@ -51,6 +51,13 @@ class Game:
             f"Inactive Player: {self.inactive_player.pretty()}"
         )
 
+    def move_tile(self, from_index: Tuple[int, int], to_index: Tuple[int, int]):
+        if self.board[from_index] is None:
+            raise RuntimeError("Cannot move piece from empty tile")
+
+        if self.board[from_index].colour != self.active_player.colour:
+            raise RuntimeError("Cannot move opponent's piece")
+
     def _disconnect_check(self, index: Tuple[int, int]):
         neighbour_count = sum(
             tile is not None for tile in self.board.neighbours(index)
