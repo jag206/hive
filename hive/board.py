@@ -1,4 +1,4 @@
-from typing import Optional, Set, Tuple
+from typing import Optional, Sequence, Set, Tuple
 import logging
 import numpy as np
 import hive.tiles
@@ -66,7 +66,39 @@ class Board:
         self.grid[inner_index] = None
 
     def connected_components(self) -> int:
-        raise NotImplementedError()
+        non_null_tile_idxs: Sequence[Tuple[int, int]] = []
+        for x in range(self.grid.shape[0]):
+            for y in range(self.grid.shape[1]):
+                non_null_tile_idx = (x, y)
+                if self.grid[non_null_tile_idx] is not None:
+                    non_null_tile_idxs.append(non_null_tile_idx)
+
+        def _expand(index: Tuple[int, int]):
+            # check if we've already visited this tile and ignore it (to avoid
+            # getting stuck in a loop). This works equally well for avoiding
+            # cells that are actually null.
+            if index not in non_null_tile_idxs:
+                return
+
+            non_null_tile_idxs.remove(index)
+            neighbour_idxs = {
+                self._add(index, (0, 1)),
+                self._add(index, (1, 0)),
+                self._add(index, (1, -1)),
+                self._add(index, (0, -1)),
+                self._add(index, (-1, 0)),
+                self._add(index, (-1, 1)),
+            }
+
+            for neighbour_idx in neighbour_idxs:
+                _expand(neighbour_idx)
+
+        num_components = 0
+        while len(non_null_tile_idxs) > 0:
+            num_components += 1
+            _expand(non_null_tile_idxs[0])
+
+        return num_components
 
     def neighbours(self, index: Tuple[int, int]) -> Set[hive.tiles.Tile]:
         """

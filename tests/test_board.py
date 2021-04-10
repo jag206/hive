@@ -66,3 +66,17 @@ def test_connected_components_d():
     board[(1, 0)] = "c"
 
     assert board.connected_components() == 1
+
+
+def test_connected_components_e():
+    board = hive.board.Board()
+
+    # add a circle of tiles
+    board[(0, 0)] = "a"
+    board[(0, 1)] = "b"
+    board[(1, 1)] = "c"
+    board[(2, 0)] = "d"
+    board[(2, -1)] = "e"
+    board[(1, -1)] = "f"
+
+    assert board.connected_components() == 1
