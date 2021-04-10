@@ -1,15 +1,14 @@
-from typing import Optional, Sequence, Set, Tuple
+from typing import Generic, Optional, Sequence, Set, Tuple, TypeVar
 import logging
 import numpy as np
-import hive.tiles
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+T = TypeVar("T")
 
-# TODO(james.gunn): Remove mention of hive.tiles from this class, it should be
-# a clean abstraction of a infinitely growable hexagonal board
-class Board:
+
+class Board(Generic[T]):
     """
     Class encapsulating the underlying structure representing the board.
     Indexed by integers relative to the root, where x points along the
@@ -27,7 +26,7 @@ class Board:
     def pretty(self):
         return "Coming soon TM"
 
-    def __getitem__(self, index: Tuple[int, int]) -> Optional[hive.tiles.Tile]:
+    def __getitem__(self, index: Tuple[int, int]) -> Optional[T]:
         inner_index = self._add(self.root, index)
 
         if inner_index[0] < 0 or inner_index[0] > self.grid.shape[0] - 1:
@@ -38,7 +37,7 @@ class Board:
 
         return self.grid[inner_index]
 
-    def __setitem__(self, index: Tuple[int, int], tile: hive.tiles.Tile):
+    def __setitem__(self, index: Tuple[int, int], tile: T):
         # TODO(james.gunn): Check for assignment of None?
         inner_index = self._add(self.root, index)
 
@@ -100,13 +99,13 @@ class Board:
 
         return num_components
 
-    def neighbours(self, index: Tuple[int, int]) -> Set[hive.tiles.Tile]:
+    def neighbours(self, index: Tuple[int, int]) -> Set[T]:
         """
         Returns the neighbours of the specified cell., may be empty.
 
         Neighbours are not returned in any order.
         """
-        neighbour_tiles: Set[hive.tiles.Tile] = set()
+        neighbour_tiles: Set[T] = set()
         neighbour_idxs = {
             self._add(index, (0, 1)),
             self._add(index, (1, 0)),

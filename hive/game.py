@@ -49,7 +49,7 @@ class Game:
     def __init__(self):
         self.active_player = Player(hive.tiles.Colour.WHITE)
         self.inactive_player = Player(hive.tiles.Colour.BLACK)
-        self.board = hive.board.Board()
+        self.board = hive.board.Board[hive.tiles.Tile]()
         self.first_move = True
 
     def pretty(self) -> str:
