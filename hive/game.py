@@ -1,4 +1,4 @@
-from typing import Dict, Tuple, Type
+from typing import Set, Tuple, Type
 import logging
 
 import hive.board
@@ -25,7 +25,7 @@ class DisconnectedHiveError(HiveError):
 class Player:
     def __init__(self, colour: hive.tiles.Colour):
         self.colour = colour
-        self.unused_tiles: Dict[hive.tiles.Tile] = {
+        self.unused_tiles: Set[hive.tiles.Tile] = {
             hive.tiles.Bee(colour),
             hive.tiles.Beetle(colour),
             hive.tiles.Ant(colour),
@@ -54,7 +54,7 @@ class Game:
 
     def pretty(self) -> str:
         return (
-            f"\nBoard:\n{self.root.pretty()}\n\n"
+            f"\nBoard:\n{self.board.pretty()}\n\n"
             f"Active Player: {self.active_player.pretty()}\n\n"
             f"Inactive Player: {self.inactive_player.pretty()}"
         )

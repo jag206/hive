@@ -1,4 +1,4 @@
-from typing import Generic, Optional, Sequence, Set, Tuple, TypeVar
+from typing import Generic, List, Optional, Set, Tuple, TypeVar
 import logging
 import numpy as np
 
@@ -65,7 +65,7 @@ class Board(Generic[T]):
         self.grid[inner_index] = None
 
     def connected_components(self) -> int:
-        non_null_tile_idxs: Sequence[Tuple[int, int]] = []
+        non_null_tile_idxs: List[Tuple[int, int]] = []
         for x in range(self.grid.shape[0]):
             for y in range(self.grid.shape[1]):
                 non_null_tile_idx = (x, y)
