@@ -22,16 +22,22 @@ def test_set_and_get():
 
 def test_neighbours():
     board = hive.board.Board()
-    board[(3, 3)] = "a"
-    board[(3, 4)] = "b"
-    board[(4, 3)] = "c"
-    board[(4, 2)] = "d"
-    board[(2, 3)] = "e"
-    board[(4, 4)] = "f"
+    a = (3, 3)
+    b = (3, 4)
+    c = (4, 3)
+    d = (4, 2)
+    e = (2, 3)
+    f = (4, 4)
+    board[a] = "a"
+    board[b] = "b"
+    board[c] = "c"
+    board[d] = "d"
+    board[e] = "e"
+    board[f] = "f"
 
-    assert board.neighbours((3, 3)) == {"b", "c", "d", "e"}
-    assert board.neighbours((4, 3)) == {"a", "b", "d", "f"}
-    assert board.neighbours((1, 3)) == {"e"}
+    assert board.neighbours((3, 3)) == {(b, "b"), (c, "c"), (d, "d"), (e, "e")}
+    assert board.neighbours((4, 3)) == {(a, "a"), (b, "b"), (d, "d"), (f, "f")}
+    assert board.neighbours((1, 3)) == {(e, "e")}
     assert board.neighbours((1, 5)) == set()
 
 

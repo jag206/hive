@@ -99,7 +99,7 @@ class Board(Generic[T]):
 
         return num_components
 
-    def neighbours(self, index: Tuple[int, int]) -> Set[T]:
+    def neighbours(self, index: Tuple[int, int]) -> Set[Tuple[Tuple[int, int], T]]:
         """
         Returns the neighbours of the specified cell., may be empty.
 
@@ -122,6 +122,6 @@ class Board(Generic[T]):
                 continue
 
             if neighbour_tile is not None:
-                neighbour_tiles.add(neighbour_tile)
+                neighbour_tiles.add((neighbour_idx, neighbour_tile))
 
         return neighbour_tiles

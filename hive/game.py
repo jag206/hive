@@ -69,15 +69,24 @@ class Game:
         if self.board[from_index].colour != self.active_player.colour:
             raise RuntimeError("Cannot move opponent's piece")
 
+        tile = self.board[from_index]
+
         # remove the specified piece from the board and check connected
         # components
-        tile = self.board[from_index]
         del self.board[from_index]
         is_disconnected = self.board.connected_components() > 1
         self.board[from_index] = tile
 
         if is_disconnected:
             raise DisconnectedHiveError("Moving tile would disconnect hive")
+
+        # TODO(james.gunn): Once all tiles have their valid moves implemented
+        # we can swap the order of this check with the above
+        if to_index not in tile.valid_moves(from_index, self.board):
+            raise RuntimeError("Tile cannot move to that location")
+
+        self.board[to_index] = self.board[from_index]
+        del self.board[from_index]
 
     def _disconnect_check(self, index: Tuple[int, int]):
         neighbour_count = sum(
@@ -88,7 +97,7 @@ class Game:
 
     def _opposing_color_violation_check(self, index: Tuple[int, int]):
         # check for opposing colour violation
-        for neighbour in self.board.neighbours(index):
+        for _, neighbour in self.board.neighbours(index):
             if neighbour.colour != self.active_player.colour:
                 raise RuntimeError("Tile would be touching opposite colour.")
 

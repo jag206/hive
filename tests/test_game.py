@@ -174,3 +174,27 @@ def test_move_must_not_disconnect_hive():
 @pytest.mark.skip("Not implemented")
 def test_cannot_move_tile_from_under_beetle():
     pass
+
+
+# this is not intended as a thorough test of all the different ways the bee can
+# move, merely as a smoke test that the bee can be moved
+def test_can_move_bee_to_valid_location():
+    game = hive.game.Game()
+    game.add_tile(hive.tiles.Bee, (0, 0))
+    game.add_tile(hive.tiles.Bee, (1, 0))
+    original_bee = game.board[(0, 0)]
+
+    game.move_tile((0, 0), (0, 1))
+
+    assert game.board[(0, 0)] is None
+    assert game.board[(0, 1)] == original_bee
+
+
+# as above, this is a smoke test for a simple invalid move for the bee
+def test_cannot_move_bee_to_invalid_location():
+    game = hive.game.Game()
+    game.add_tile(hive.tiles.Bee, (0, 0))
+    game.add_tile(hive.tiles.Bee, (1, 0))
+
+    with pytest.raises(RuntimeError):
+        game.move_tile((0, 0), (1, 1))
