@@ -105,7 +105,7 @@ class Board(Generic[T]):
 
         Neighbours are not returned in any order.
         """
-        neighbour_tiles: Set[T] = set()
+        neighbour_tiles: Set[Tuple[Tuple[int, int], T]] = set()
         neighbour_idxs = {
             self._add(index, (0, 1)),
             self._add(index, (1, 0)),
