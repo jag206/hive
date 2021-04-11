@@ -1,4 +1,4 @@
-from typing import Dict, Tuple, Type
+from typing import Set, Tuple, Type
 import logging
 
 import hive.board
@@ -14,17 +14,29 @@ ch.setFormatter(formatter)
 # logger.addHandler(ch)
 
 
+class HiveError(RuntimeError):
+    pass
+
+
+class DisconnectedHiveError(HiveError):
+    pass
+
+
 class Player:
     def __init__(self, colour: hive.tiles.Colour):
         self.colour = colour
-        self.unused_tiles: Dict[hive.tiles.Tile] = {
+        self.unused_tiles: Set[hive.tiles.Tile] = {
             hive.tiles.Bee(colour),
+            hive.tiles.Beetle(colour),
             hive.tiles.Ant(colour),
             hive.tiles.Ant(colour),
             hive.tiles.Ant(colour),
             hive.tiles.Spider(colour),
             hive.tiles.Spider(colour),
             hive.tiles.Spider(colour),
+            hive.tiles.Grasshopper(colour),
+            hive.tiles.Grasshopper(colour),
+            hive.tiles.Grasshopper(colour),
         }
         self.turn = 0
         self.bee_played = False
@@ -37,15 +49,44 @@ class Game:
     def __init__(self):
         self.active_player = Player(hive.tiles.Colour.WHITE)
         self.inactive_player = Player(hive.tiles.Colour.BLACK)
-        self.board = hive.board.Board()
+        self.board = hive.board.Board[hive.tiles.Tile]()
         self.first_move = True
 
     def pretty(self) -> str:
         return (
-            f"\nBoard:\n{self.root.pretty()}\n\n"
+            f"\nBoard:\n{self.board.pretty()}\n\n"
             f"Active Player: {self.active_player.pretty()}\n\n"
             f"Inactive Player: {self.inactive_player.pretty()}"
         )
+
+    def move_tile(self, from_index: Tuple[int, int], to_index: Tuple[int, int]):
+        if self.board[from_index] is None:
+            raise RuntimeError("Cannot move piece from empty tile")
+
+        if self.board[to_index] is not None:
+            raise RuntimeError("Cannot move piece to non-empty tile")
+
+        if self.board[from_index].colour != self.active_player.colour:
+            raise RuntimeError("Cannot move opponent's piece")
+
+        tile = self.board[from_index]
+
+        # remove the specified piece from the board and check connected
+        # components
+        del self.board[from_index]
+        is_disconnected = self.board.connected_components() > 1
+        self.board[from_index] = tile
+
+        if is_disconnected:
+            raise DisconnectedHiveError("Moving tile would disconnect hive")
+
+        # TODO(james.gunn): Once all tiles have their valid moves implemented
+        # we can swap the order of this check with the above
+        if to_index not in tile.valid_moves(from_index, self.board):
+            raise RuntimeError("Tile cannot move to that location")
+
+        self.board[to_index] = self.board[from_index]
+        del self.board[from_index]
 
     def _disconnect_check(self, index: Tuple[int, int]):
         neighbour_count = sum(
@@ -56,7 +97,7 @@ class Game:
 
     def _opposing_color_violation_check(self, index: Tuple[int, int]):
         # check for opposing colour violation
-        for neighbour in self.board.neighbours(index):
+        for _, neighbour in self.board.neighbours(index):
             if neighbour.colour != self.active_player.colour:
                 raise RuntimeError("Tile would be touching opposite colour.")
 

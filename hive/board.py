@@ -1,15 +1,14 @@
-from typing import Optional, Set, Tuple
+from typing import Generic, List, Optional, Set, Tuple, TypeVar
 import logging
 import numpy as np
-import hive.tiles
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+T = TypeVar("T")
 
-# TODO(james.gunn): Remove mention of hive.tiles from this class, it should be
-# a clean abstraction of a infinitely growable hexagonal board
-class Board:
+
+class Board(Generic[T]):
     """
     Class encapsulating the underlying structure representing the board.
     Indexed by integers relative to the root, where x points along the
@@ -27,7 +26,7 @@ class Board:
     def pretty(self):
         return "Coming soon TM"
 
-    def __getitem__(self, index: Tuple[int, int]) -> Optional[hive.tiles.Tile]:
+    def __getitem__(self, index: Tuple[int, int]) -> Optional[T]:
         inner_index = self._add(self.root, index)
 
         if inner_index[0] < 0 or inner_index[0] > self.grid.shape[0] - 1:
@@ -38,7 +37,8 @@ class Board:
 
         return self.grid[inner_index]
 
-    def __setitem__(self, index: Tuple[int, int], tile: hive.tiles.Tile):
+    def __setitem__(self, index: Tuple[int, int], tile: T):
+        # TODO(james.gunn): Check for assignment of None?
         inner_index = self._add(self.root, index)
 
         # trigger a resize if required
@@ -59,13 +59,53 @@ class Board:
         new_inner_index = self._add(self.root, index)
         self.grid[new_inner_index] = tile
 
-    def neighbours(self, index: Tuple[int, int]) -> Set[hive.tiles.Tile]:
+    def __delitem__(self, index: Tuple[int, int]):
+        # TODO(james.gunn): Might we want to shrink the board back down?
+        inner_index = self._add(self.root, index)
+        self.grid[inner_index] = None
+
+    def connected_components(self) -> int:
+        non_null_tile_idxs: List[Tuple[int, int]] = []
+        for x in range(self.grid.shape[0]):
+            for y in range(self.grid.shape[1]):
+                non_null_tile_idx = (x, y)
+                if self.grid[non_null_tile_idx] is not None:
+                    non_null_tile_idxs.append(non_null_tile_idx)
+
+        def _expand(index: Tuple[int, int]):
+            # check if we've already visited this tile and ignore it (to avoid
+            # getting stuck in a loop). This works equally well for avoiding
+            # cells that are actually null.
+            if index not in non_null_tile_idxs:
+                return
+
+            non_null_tile_idxs.remove(index)
+            neighbour_idxs = {
+                self._add(index, (0, 1)),
+                self._add(index, (1, 0)),
+                self._add(index, (1, -1)),
+                self._add(index, (0, -1)),
+                self._add(index, (-1, 0)),
+                self._add(index, (-1, 1)),
+            }
+
+            for neighbour_idx in neighbour_idxs:
+                _expand(neighbour_idx)
+
+        num_components = 0
+        while len(non_null_tile_idxs) > 0:
+            num_components += 1
+            _expand(non_null_tile_idxs[0])
+
+        return num_components
+
+    def neighbours(self, index: Tuple[int, int]) -> Set[Tuple[Tuple[int, int], T]]:
         """
         Returns the neighbours of the specified cell., may be empty.
 
         Neighbours are not returned in any order.
         """
-        neighbour_tiles: Set[hive.tiles.Tile] = set()
+        neighbour_tiles: Set[Tuple[Tuple[int, int], T]] = set()
         neighbour_idxs = {
             self._add(index, (0, 1)),
             self._add(index, (1, 0)),
@@ -82,6 +122,6 @@ class Board:
                 continue
 
             if neighbour_tile is not None:
-                neighbour_tiles.add(neighbour_tile)
+                neighbour_tiles.add((neighbour_idx, neighbour_tile))
 
         return neighbour_tiles
