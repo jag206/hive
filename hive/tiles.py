@@ -65,23 +65,13 @@ class Tile:
 
         raise ValueError()
 
-    def valid_moves(self, index: Tuple[int, int], board: hive.board.Board) -> Set[Tuple[int, int]]:
+    def _check_step(self, index: Tuple[int, int], board: hive.board.Board):
         """
-        Takes in the board and the current position of this tile and returns the possible destination indices of this
-        tile.
+        Finds moves that take a single step from the given index
         """
-        raise NotImplementedError()
-
-
-class Bee(Tile):
-    def _emoji(self) -> str:
-        return "🐝"
-
-    def valid_moves(self, index: Tuple[int, int], board: hive.board.Board) -> Set[Tuple[int, int]]:
         valid_moves = set()
         neighbours = board.neighbours(index)
         relative_idxs = [self._subtract(neighbour_idx, index) for neighbour_idx, _ in neighbours]
-
         def check_single_move(relative_idx: Tuple[int, int]):
             position = self._position(relative_idx)
             if (
@@ -104,10 +94,20 @@ class Bee(Tile):
 
         return valid_moves
 
+    def valid_moves(self, index: Tuple[int, int], board: hive.board.Board) -> Set[Tuple[int, int]]:
+        """
+        Takes in the board and the current position of this tile and returns the possible destination indices of this
+        tile.
+        """
+        raise NotImplementedError()
 
-class Ant(Tile):
+
+class Bee(Tile):
     def _emoji(self) -> str:
-        return "🐜"
+        return "🐝"
+
+    def valid_moves(self, index: Tuple[int, int], board: hive.board.Board) -> Set[Tuple[int, int]]:
+        return self._check_step(index, board)
 
 
 class Spider(Tile):
@@ -119,39 +119,19 @@ class Spider(Tile):
         tmp = board[index]
         del board[index]
 
-        def do_step(step_index: Tuple[int, int]):
-            valid_moves = set()
-            neighbours = board.neighbours(step_index)
-            relative_idxs = [self._subtract(neighbour_idx, step_index) for neighbour_idx, _ in neighbours]
-            def check_single_move(relative_idx: Tuple[int, int]):
-                position = self._position(relative_idx)
-                if (
-                    self._relative_idx((position + 1) % 6) not in relative_idxs and
-                    self._relative_idx((position + 2) % 6) not in relative_idxs
-                ):
-                    valid_moves.add(
-                        self._add(step_index, self._relative_idx((position + 1) % 6))
-                    )
-                if (
-                    self._relative_idx((position - 1) % 6) not in relative_idxs and
-                    self._relative_idx((position - 2) % 6) not in relative_idxs
-                ):
-                    valid_moves.add(
-                        self._add(step_index, self._relative_idx((position - 1) % 6))
-                    )
-
-            for relative_idx in relative_idxs:
-                check_single_move(relative_idx)
-
-            return valid_moves
-
-        valid_moves_1 = do_step(index)
-        valid_moves_2 = set().union(*list(map(do_step, valid_moves_1))) - set(index)
-        valid_moves_3 = set().union(*list(map(do_step, valid_moves_2))) - valid_moves_1
+        step_lambda = lambda index: self._check_step(index, board)
+        valid_moves_1 = self._check_step(index, board)
+        valid_moves_2 = set().union(*list(map(step_lambda, valid_moves_1))) - set(index)
+        valid_moves_3 = set().union(*list(map(step_lambda, valid_moves_2))) - valid_moves_1
 
         board[index] = tmp
 
         return valid_moves_3
+
+
+class Ant(Tile):
+    def _emoji(self) -> str:
+        return "🐜"
 
 
 class Beetle(Tile):
