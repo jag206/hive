@@ -84,9 +84,15 @@ class Bee(Tile):
 
         def check_single_move(relative_idx: Tuple[int, int]):
             position = self._position(relative_idx)
-            if self._relative_idx((position + 1) % 6) not in relative_idxs and self._relative_idx((position + 2) % 6) not in relative_idxs:
+            if (
+                self._relative_idx((position + 1) % 6) not in relative_idxs and
+                self._relative_idx((position + 2) % 6) not in relative_idxs
+            ):
                 valid_moves.add(self._relative_idx((position + 1) % 6))
-            if self._relative_idx((position - 1) % 6) not in relative_idxs and self._relative_idx((position - 2) % 6) not in relative_idxs:
+            if (
+                self._relative_idx((position - 1) % 6) not in relative_idxs and
+                self._relative_idx((position - 2) % 6) not in relative_idxs
+            ):
                 valid_moves.add(self._relative_idx((position - 1) % 6))
 
         for relative_idx in relative_idxs:
