@@ -176,9 +176,7 @@ def test_cannot_move_tile_from_under_beetle():
     pass
 
 
-# this is not intended as a thorough test of all the different ways the bee can
-# move, merely as a smoke test that the bee can be moved
-def test_can_move_bee_to_valid_location():
+def test_can_move_bee_to_valid_location_smoke():
     game = hive.game.Game()
     game.add_tile(hive.tiles.Bee, (0, 0))
     game.add_tile(hive.tiles.Bee, (1, 0))
@@ -190,8 +188,7 @@ def test_can_move_bee_to_valid_location():
     assert game.board[(0, 1)] == original_bee
 
 
-# as above, this is a smoke test for a simple invalid move for the bee
-def test_cannot_move_bee_to_invalid_location():
+def test_cannot_move_bee_to_invalid_location_smoke():
     game = hive.game.Game()
     game.add_tile(hive.tiles.Bee, (0, 0))
     game.add_tile(hive.tiles.Bee, (1, 0))
