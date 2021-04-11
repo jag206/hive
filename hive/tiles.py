@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Set, Tuple
+from typing import Optional, Set, Tuple
 import logging
 
 import hive.board
@@ -23,15 +23,6 @@ class Tile:
     def __str__(self) -> str:
         return self._emoji()
 
-    def valid_moves(self, index: Tuple[int, int], board: hive.board.Board) -> Set[Tuple[int, int]]:
-        """
-        Takes in the board and the current position of this tile and returns the possible destination indices of this
-        tile.
-        """
-        raise NotImplementedError()
-
-
-class Bee(Tile):
     @staticmethod
     def _add(left: Tuple[int, int], right: Tuple[int, int]):
         return (left[0] + right[0], left[1] + right[1])
@@ -74,6 +65,15 @@ class Bee(Tile):
 
         raise ValueError()
 
+    def valid_moves(self, index: Tuple[int, int], board: hive.board.Board) -> Set[Tuple[int, int]]:
+        """
+        Takes in the board and the current position of this tile and returns the possible destination indices of this
+        tile.
+        """
+        raise NotImplementedError()
+
+
+class Bee(Tile):
     def _emoji(self) -> str:
         return "🐝"
 
@@ -88,12 +88,16 @@ class Bee(Tile):
                 self._relative_idx((position + 1) % 6) not in relative_idxs and
                 self._relative_idx((position + 2) % 6) not in relative_idxs
             ):
-                valid_moves.add(self._relative_idx((position + 1) % 6))
+                valid_moves.add(
+                    self._add(index, self._relative_idx((position + 1) % 6))
+                )
             if (
                 self._relative_idx((position - 1) % 6) not in relative_idxs and
                 self._relative_idx((position - 2) % 6) not in relative_idxs
             ):
-                valid_moves.add(self._relative_idx((position - 1) % 6))
+                valid_moves.add(
+                    self._add(index, self._relative_idx((position - 1) % 6))
+                )
 
         for relative_idx in relative_idxs:
             check_single_move(relative_idx)
@@ -109,6 +113,45 @@ class Ant(Tile):
 class Spider(Tile):
     def _emoji(self) -> str:
         return "🕷️"
+
+    def valid_moves(self, index: Tuple[int, int], board: hive.board.Board) -> Set[Tuple[int, int]]:
+        # temporarily remove tile from the board
+        tmp = board[index]
+        del board[index]
+
+        def do_step(step_index: Tuple[int, int]):
+            valid_moves = set()
+            neighbours = board.neighbours(step_index)
+            relative_idxs = [self._subtract(neighbour_idx, step_index) for neighbour_idx, _ in neighbours]
+            def check_single_move(relative_idx: Tuple[int, int]):
+                position = self._position(relative_idx)
+                if (
+                    self._relative_idx((position + 1) % 6) not in relative_idxs and
+                    self._relative_idx((position + 2) % 6) not in relative_idxs
+                ):
+                    valid_moves.add(
+                        self._add(step_index, self._relative_idx((position + 1) % 6))
+                    )
+                if (
+                    self._relative_idx((position - 1) % 6) not in relative_idxs and
+                    self._relative_idx((position - 2) % 6) not in relative_idxs
+                ):
+                    valid_moves.add(
+                        self._add(step_index, self._relative_idx((position - 1) % 6))
+                    )
+
+            for relative_idx in relative_idxs:
+                check_single_move(relative_idx)
+
+            return valid_moves
+
+        valid_moves_1 = do_step(index)
+        valid_moves_2 = set().union(*list(map(do_step, valid_moves_1))) - set(index)
+        valid_moves_3 = set().union(*list(map(do_step, valid_moves_2))) - valid_moves_1
+
+        board[index] = tmp
+
+        return valid_moves_3
 
 
 class Beetle(Tile):

@@ -178,20 +178,46 @@ def test_cannot_move_tile_from_under_beetle():
 
 def test_can_move_bee_to_valid_location_smoke():
     game = hive.game.Game()
-    game.add_tile(hive.tiles.Bee, (0, 0))
+    game.add_tile(hive.tiles.Spider, (0, 0))
     game.add_tile(hive.tiles.Bee, (1, 0))
-    original_bee = game.board[(0, 0)]
+    game.add_tile(hive.tiles.Spider, (0, -1))
+    original_bee = game.board[(1, 0)]
 
-    game.move_tile((0, 0), (0, 1))
+    game.move_tile((1, 0), (0, 1))
 
-    assert game.board[(0, 0)] is None
+    assert game.board[(1, 0)] is None
     assert game.board[(0, 1)] == original_bee
 
 
 def test_cannot_move_bee_to_invalid_location_smoke():
     game = hive.game.Game()
-    game.add_tile(hive.tiles.Bee, (0, 0))
+    game.add_tile(hive.tiles.Spider, (0, 0))
     game.add_tile(hive.tiles.Bee, (1, 0))
+    game.add_tile(hive.tiles.Spider, (0, -1))
+    original_bee = game.board[(1, 0)]
 
-    with pytest.raises(RuntimeError):
-        game.move_tile((0, 0), (1, 1))
+    with pytest.raises(hive.game.InvalidMoveError):
+        game.move_tile((1, 0), (1, 1))
+
+
+def test_can_move_spider_to_valid_location_smoke():
+    game = hive.game.Game()
+    game.add_tile(hive.tiles.Bee, (0, 0))
+    game.add_tile(hive.tiles.Spider, (1, 0))
+    game.add_tile(hive.tiles.Ant, (-1, 0))
+    original_spider = game.board[(1, 0)]
+
+    game.move_tile((1, 0), (-2, 1))
+
+    assert game.board[(1, 0)] is None
+    assert game.board[(-2, 1)] == original_spider
+
+
+def test_cannot_move_spider_to_invalid_location_smoke():
+    game = hive.game.Game()
+    game.add_tile(hive.tiles.Bee, (0, 0))
+    game.add_tile(hive.tiles.Spider, (1, 0))
+    game.add_tile(hive.tiles.Ant, (-1, 0))
+
+    with pytest.raises(hive.game.InvalidMoveError):
+        game.move_tile((1, 0), (1, 1))
