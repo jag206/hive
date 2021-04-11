@@ -143,7 +143,7 @@ def test_cannot_request_move_to_occupied_tile():
         game.move_tile((0, 0), (0, 1))
 
 
-@pytest.mark.skip("Not implemented")
+@pytest.mark.skip("Requires beetle movement implementation")
 def test_can_move_beetle_onto_occupied_tile():
     pass
 
@@ -171,7 +171,7 @@ def test_move_must_not_disconnect_hive():
         game.move_tile((0, 0), (1, -1))
 
 
-@pytest.mark.skip("Not implemented")
+@pytest.mark.skip("Requires beetle movement implementation")
 def test_cannot_move_tile_from_under_beetle():
     pass
 
