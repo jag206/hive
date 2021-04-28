@@ -22,6 +22,10 @@ class DisconnectedHiveError(HiveError):
     pass
 
 
+class InvalidMoveError(HiveError):
+    pass
+
+
 class Player:
     def __init__(self, colour: hive.tiles.Colour):
         self.colour = colour
@@ -83,7 +87,7 @@ class Game:
         # TODO(james.gunn): Once all tiles have their valid moves implemented
         # we can swap the order of this check with the above
         if to_index not in tile.valid_moves(from_index, self.board):
-            raise RuntimeError("Tile cannot move to that location")
+            raise InvalidMoveError()
 
         self.board[to_index] = self.board[from_index]
         del self.board[from_index]
