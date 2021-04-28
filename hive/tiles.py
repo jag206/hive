@@ -173,3 +173,26 @@ class Beetle(Tile):
 class Grasshopper(Tile):
     def _emoji(self) -> str:
         return "🦗"
+
+    def valid_moves(self, index: Tuple[int, int], board: hive.board.Board) -> Set[Tuple[int, int]]:
+        valid_moves: Set[Tuple[int, int]] = set()
+
+        def maybe_add_in_direction(direction: Tuple[int, int]):
+            current = self._add(index, direction)
+            while board[current] is not None:
+                current = self._add(current, direction)
+
+            # only add as a valid move if we've gone further than one step in
+            # this direction
+            if current != self._add(index, direction):
+                valid_moves.add(current)
+
+        # look for grasshopper moves in each direction
+        maybe_add_in_direction((0, 1))
+        maybe_add_in_direction((1, 0))
+        maybe_add_in_direction((1, -1))
+        maybe_add_in_direction((0, -1))
+        maybe_add_in_direction((-1, 0))
+        maybe_add_in_direction((-1, 1))
+
+        return valid_moves
