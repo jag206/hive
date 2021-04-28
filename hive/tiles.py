@@ -141,6 +141,29 @@ class Ant(Tile):
     def _emoji(self) -> str:
         return "🐜"
 
+    def valid_moves(self, index: Tuple[int, int], board: hive.board.Board) -> Set[Tuple[int, int]]:
+        # temporarily remove tile from the board
+        tmp = board[index]
+        del board[index]
+
+        # explicitly name the empty set to keep mypy happy
+        empty_set: Set[Tuple[int, int]] = set()
+
+        valid_moves: Set[Tuple[int, int]] = set()
+        new_moves = {index}
+        while new_moves:
+            next_moves = empty_set.union(*map(
+                lambda index: self._check_step(index, board),
+                new_moves
+            ))
+            # always subtract off the original index to ensure we don't
+            # include it in any move set
+            new_moves = next_moves - valid_moves - {index}
+            valid_moves = valid_moves.union(new_moves)
+
+        board[index] = tmp
+        return valid_moves
+
 
 class Beetle(Tile):
     def _emoji(self) -> str:
