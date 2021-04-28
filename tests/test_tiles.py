@@ -22,7 +22,6 @@ def test_spider_moves_with_4_specific_neighbours():
     }
 
 
-
 def test_bee_moves_with_4_specific_neighbours():
     board = hive.board.Board[hive.tiles.Tile]()
     bee = hive.tiles.Bee(hive.tiles.Colour.WHITE)

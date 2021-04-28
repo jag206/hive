@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Optional, Set, Tuple
+from typing import Set, Tuple
 import logging
 
 import hive.board
@@ -65,13 +65,14 @@ class Tile:
 
         raise ValueError()
 
-    def _check_step(self, index: Tuple[int, int], board: hive.board.Board):
+    def _check_step(self, index: Tuple[int, int], board: hive.board.Board) -> Set[Tuple[int, int]]:
         """
         Finds moves that take a single step from the given index
         """
         valid_moves = set()
         neighbours = board.neighbours(index)
         relative_idxs = [self._subtract(neighbour_idx, index) for neighbour_idx, _ in neighbours]
+
         def check_single_move(relative_idx: Tuple[int, int]):
             position = self._position(relative_idx)
             if (
@@ -119,10 +120,17 @@ class Spider(Tile):
         tmp = board[index]
         del board[index]
 
-        step_lambda = lambda index: self._check_step(index, board)
         valid_moves_1 = self._check_step(index, board)
-        valid_moves_2 = set().union(*list(map(step_lambda, valid_moves_1))) - set(index)
-        valid_moves_3 = set().union(*list(map(step_lambda, valid_moves_2))) - valid_moves_1
+        # explicitly name the empty set to keep mypy happy
+        empty_set: Set[Tuple[int, int]] = set()
+        valid_moves_2 = empty_set.union(*map(
+            lambda index: self._check_step(index, board),
+            valid_moves_1
+        )) - {index}
+        valid_moves_3 = empty_set.union(*map(
+            lambda index: self._check_step(index, board),
+            valid_moves_2
+        )) - valid_moves_1
 
         board[index] = tmp
 

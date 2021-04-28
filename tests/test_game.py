@@ -194,7 +194,6 @@ def test_cannot_move_bee_to_invalid_location_smoke():
     game.add_tile(hive.tiles.Spider, (0, 0))
     game.add_tile(hive.tiles.Bee, (1, 0))
     game.add_tile(hive.tiles.Spider, (0, -1))
-    original_bee = game.board[(1, 0)]
 
     with pytest.raises(hive.game.InvalidMoveError):
         game.move_tile((1, 0), (1, 1))
