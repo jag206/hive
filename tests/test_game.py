@@ -145,6 +145,7 @@ def test_cannot_move_opponents_tile():
     with pytest.raises(RuntimeError):
         game.move_tile((0, 0), (0, 1))
 
+
 # this test was implemented to catch a bug whereby moving a piece didn't change
 # the turn of the person moving it
 def test_can_move_my_tile_after_opponents_move():
@@ -245,6 +246,7 @@ def test_cannot_move_spider_to_invalid_location_smoke():
 
     with pytest.raises(hive.game.InvalidMoveError):
         game.move_tile((2, 0), (2, -1))
+
 
 # TODO(james.gunn): We should implement extra movement smoke tests for the
 # beetles that we have subsequently implemented but not added the tests for
