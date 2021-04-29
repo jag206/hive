@@ -92,6 +92,10 @@ class Game:
         self.board[to_index] = self.board[from_index]
         del self.board[from_index]
 
+        # that succeeded, so now switch turns
+        self.active_player.turn += 1
+        self.active_player, self.inactive_player = self.inactive_player, self.active_player
+
     def _disconnect_check(self, index: Tuple[int, int]):
         neighbour_count = sum(
             tile is not None for tile in self.board.neighbours(index)
