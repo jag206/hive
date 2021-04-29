@@ -64,6 +64,9 @@ class Game:
         )
 
     def move_tile(self, from_index: Tuple[int, int], to_index: Tuple[int, int]):
+        if not self.active_player.bee_played:
+            raise RuntimeError("Cannot move piece until bee played")
+
         if self.board[from_index] is None:
             raise RuntimeError("Cannot move piece from empty tile")
 

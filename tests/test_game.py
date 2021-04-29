@@ -94,6 +94,18 @@ def test_must_play_bee_on_or_before_turn_three_c():
     game.add_tile(hive.tiles.Spider, (0, 3))
 
 
+def test_cannot_move_until_bee_played():
+    game = hive.game.Game()
+    game.add_tile(hive.tiles.Bee, (0, 0))
+    game.add_tile(hive.tiles.Ant, (0, 1))
+    # can move the bee that was played on turn 1
+    game.move_tile((0, 0), (1, 0))
+
+    # can't move the ant because that player hasn't played their bee yet
+    with pytest.raises(RuntimeError):
+        game.move_tile((0, 1), (0, 0))
+
+
 def test_cannot_add_tile_disconnected():
     game = hive.game.Game()
     game.add_tile(hive.tiles.Spider, (0, 0))
@@ -211,24 +223,28 @@ def test_cannot_move_bee_to_invalid_location_smoke():
 def test_can_move_spider_to_valid_location_smoke():
     game = hive.game.Game()
     game.add_tile(hive.tiles.Bee, (0, 0))
-    game.add_tile(hive.tiles.Spider, (1, 0))
+    game.add_tile(hive.tiles.Bee, (1, 0))
     game.add_tile(hive.tiles.Ant, (-1, 0))
-    original_spider = game.board[(1, 0)]
+    game.add_tile(hive.tiles.Spider, (2, 0))
+    game.add_tile(hive.tiles.Ant, (-2, 0))
+    original_spider = game.board[(2, 0)]
 
-    game.move_tile((1, 0), (-2, 1))
+    game.move_tile((2, 0), (0, -1))
 
-    assert game.board[(1, 0)] is None
-    assert game.board[(-2, 1)] == original_spider
+    assert game.board[(2, 0)] is None
+    assert game.board[(0, -1)] == original_spider
 
 
 def test_cannot_move_spider_to_invalid_location_smoke():
     game = hive.game.Game()
     game.add_tile(hive.tiles.Bee, (0, 0))
-    game.add_tile(hive.tiles.Spider, (1, 0))
+    game.add_tile(hive.tiles.Bee, (1, 0))
     game.add_tile(hive.tiles.Ant, (-1, 0))
+    game.add_tile(hive.tiles.Spider, (2, 0))
+    game.add_tile(hive.tiles.Ant, (-2, 0))
 
     with pytest.raises(hive.game.InvalidMoveError):
-        game.move_tile((1, 0), (1, 1))
+        game.move_tile((2, 0), (2, -1))
 
 # TODO(james.gunn): We should implement extra movement smoke tests for the
 # beetles that we have subsequently implemented but not added the tests for
